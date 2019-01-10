@@ -85,7 +85,7 @@ public class MyApplication extends Application {
      */
     private void setupDatabase() {
         //创建数据库shop.db"
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(new GreenDaoContext(this), "file.db");
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "file.db");
         //获取可写数据库
         SQLiteDatabase db = helper.getWritableDatabase();
         Log.e("xgx", db.getPath());

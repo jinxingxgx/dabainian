@@ -47,7 +47,8 @@ public class UploadActivity extends AppCompatActivity {
         setContentView(R.layout.activity_upload);
         ButterKnife.bind(this);
         path = getIntent().getStringExtra("path");
-        b = ConvertUtils.bitmap2Bytes(ImageUtils.getBitmap(new File(path)), Bitmap.CompressFormat.JPEG);
+
+        b = ConvertUtils.bitmap2Bytes(ImageUtils.compressBySampleSize(ImageUtils.getBitmap(new File(path)), 2), Bitmap.CompressFormat.JPEG);
         base64Pic = EncodeUtils.base64Decode(EncodeUtils.base64Encode2String(b));
         Glide.with(UploadActivity.this).load(base64Pic).into(showPicView);
         titlebar.getLeftTextView().setOnClickListener(new View.OnClickListener() {

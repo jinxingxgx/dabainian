@@ -3,7 +3,6 @@ package com.xgx.dabainian;
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,13 +22,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONReader;
 import com.allen.library.SuperTextView;
-import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.EncodeUtils;
 import com.blankj.utilcode.util.EncryptUtils;
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.ImageUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.hss01248.dialog.StyledDialog;
@@ -241,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
     private static final int PRC_PHOTO_PICKER = 1;
 
     private static final int RC_CHOOSE_PHOTO = 1;
@@ -320,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
                     dir.mkdir();
                 }
                 String path = dir.toString() + File.separator + "dabainian.json";
-                Utils.writeStringToFile(JSON.toJSONString(infos), dir.toString() + File.separator + "dabainian.json");
+                Utils.writeStringToFile(JSON.toJSONString(infos), path);
                 jsonPathTv.setText(path);
                 ToastUtils.showShort("导出成功");
                 break;

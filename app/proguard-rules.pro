@@ -53,6 +53,11 @@ public static java.lang.String TABLENAME;
 -dontwarn com.hss01248.dialog.**
 -keep  class com.hss01248.dialog.** { *; }
 
+-dontwarn gr.net.maroulis.library.**
+-keep  class gr.net.maroulis.library.** { *; }
+-dontwarn com.litesuits.common.utils.**
+-keep  class com.litesuits.common.utils.** { *; }
+
 -keep public class * implements com.bumptech.glide.module.GlideModule
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
 -keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
