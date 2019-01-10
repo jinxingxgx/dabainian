@@ -18,6 +18,7 @@ import java.io.Serializable;
  */
 public class MyFileEntity implements Serializable {
 
+
     private String name;
     private File file;
     private String contentType;
