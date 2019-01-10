@@ -159,14 +159,8 @@ public class MainActivity extends AppCompatActivity {
                 super.handleMessage(msg);
             }
         };
-        boolean isDebug = MyApplication.getInstance().getSP().getBoolean("isAppDebug", false);
         isAdmin = MyApplication.getInstance().getSP().getBoolean("isAdmin", false);
-        if (isDebug) {
-            pwdStv.setVisibility(View.VISIBLE);
-        } else {
-            pwdStv.setVisibility(View.GONE);
-
-        }
+        pwdStv.setVisibility(View.VISIBLE);
         if (isAdmin) {
             pwdStv.setSwitchIsChecked(true);
             exportStv.setVisibility(View.VISIBLE);
@@ -280,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                 ToastUtils.showShort("数据导入成功");
                 onResume();
             } catch (Exception e) {
-                ToastUtils.showShort("数据格式错误");
+                ToastUtils.showShort("请导入数据文件");
             }
 
         }
@@ -358,49 +352,49 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.titlebar:
-                long secondTime = System.currentTimeMillis();
-                // 判断每次点击的事件间隔是否符合连击的有效范围
-                // 不符合时，有可能是连击的开始，否则就仅仅是单击
-                if (secondTime - firstTime <= interval) {
-                    ++count;
-                    boolean isDebug = MyApplication.getInstance().getSP().getBoolean("isAppDebug", false);
-                    String s = "";
-                    if (isDebug) {
-                        s = "管理员";
-                    } else {
-                        s = "普通";
-                    }
-                    if (count == 3) {
-
-                        ToastUtils.showShort("连续点击10次开启" + s + "模式");
-                    }
-                    if (count == 7) {
-                        ToastUtils.showShort("连续点击3次开启" + s + "模式");
-
-                    } else if (count == 8) {
-                        ToastUtils.showShort("连续点击2次开启" + s + "模式");
-                    } else if (count == 9) {
-                        ToastUtils.showShort("连续点击1次开启" + s + "模式");
-                    } else if (count == 10) {
-                        MyApplication.getInstance().getSP().edit().putBoolean("isAppDebug", !isDebug).apply();
-                        if (!isDebug) {
-                            pwdStv.setVisibility(View.VISIBLE);
-                            ToastUtils.showShort("你已开启了" + s + "模式");
-
-                        } else {
-                            pwdStv.setVisibility(View.GONE);
-                            ToastUtils.showShort("你已开启了" + s + "模式");
-                        }
-                    } else if (count > 10) {
-                        ToastUtils.showShort("手酸不酸？不要再点击啦~");
-
-                    }
-                } else {
-                    count = 1;
-                }
-                // 延迟，用于判断用户的点击操作是否结束
-                delay();
-                firstTime = secondTime;
+//                long secondTime = System.currentTimeMillis();
+//                // 判断每次点击的事件间隔是否符合连击的有效范围
+//                // 不符合时，有可能是连击的开始，否则就仅仅是单击
+//                if (secondTime - firstTime <= interval) {
+//                    ++count;
+//                    boolean isDebug = MyApplication.getInstance().getSP().getBoolean("isAppDebug", false);
+//                    String s = "";
+//                    if (isDebug) {
+//                        s = "管理员";
+//                    } else {
+//                        s = "普通";
+//                    }
+//                    if (count == 3) {
+//
+//                        ToastUtils.showShort("连续点击10次开启" + s + "模式");
+//                    }
+//                    if (count == 7) {
+//                        ToastUtils.showShort("连续点击3次开启" + s + "模式");
+//
+//                    } else if (count == 8) {
+//                        ToastUtils.showShort("连续点击2次开启" + s + "模式");
+//                    } else if (count == 9) {
+//                        ToastUtils.showShort("连续点击1次开启" + s + "模式");
+//                    } else if (count == 10) {
+//                        MyApplication.getInstance().getSP().edit().putBoolean("isAppDebug", !isDebug).apply();
+//                        if (!isDebug) {
+//                            pwdStv.setVisibility(View.VISIBLE);
+//                            ToastUtils.showShort("你已开启了" + s + "模式");
+//
+//                        } else {
+//                            pwdStv.setVisibility(View.GONE);
+//                            ToastUtils.showShort("你已开启了" + s + "模式");
+//                        }
+//                    } else if (count > 10) {
+//                        ToastUtils.showShort("手酸不酸？不要再点击啦~");
+//
+//                    }
+//                } else {
+//                    count = 1;
+//                }
+//                // 延迟，用于判断用户的点击操作是否结束
+//                delay();
+//                firstTime = secondTime;
                 break;
         }
     }
