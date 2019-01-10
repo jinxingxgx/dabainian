@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.wuhenzhizao.titlebar.widget.CommonTitleBar
+            android:id="@+id/titlebar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:centerText="大拜年"
+            app:centerTextColor="@color/white"
+            app:centerType="textView"
+            app:fillStatusBar="true"
+            app:leftDrawablePadding="0dp"
+            app:rightTextColor="@color/white"
+            app:rightType="textView"
+            app:statusBarColor="@color/colorPrimary"
+            app:statusBarMode="light"
+            app:titleBarColor="@color/colorPrimary" />
+
+        <LinearLayout
+            android:id="@+id/picLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/show_pic_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="center"
+                android:src="@drawable/upload"></ImageView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/settingLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+
+            <com.allen.library.SuperTextView
+                android:id="@+id/pwd_stv"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/activity_list_height"
+                android:visibility="gone"
+                app:sLeftTextString="开启管理员模式"
+                app:sRightViewType="switchBtn"
+                app:sSwitchIsChecked="false" />
+
+
+            <com.allen.library.SuperTextView
+                android:id="@+id/uppic_stv"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/activity_list_height"
+                app:sLeftTextString="上传图片"
+                app:sRightIconRes="@drawable/next_item"
+                app:sRightTextColor="@color/content"
+                app:sRightTextString="已上传8张" />
+
+
+            <com.allen.library.SuperTextView
+                android:id="@+id/updb_stv"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/activity_list_height"
+                app:sLeftTextString="识别数据文件"
+                app:sRightIconRes="@drawable/next_item"
+                app:sRightTextColor="@color/content"
+                app:sRightTextString="点击上传" />
+
+            <com.allen.library.SuperTextView
+                android:id="@+id/export_stv"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/activity_list_height"
+                android:visibility="gone"
+                app:sLeftTextString="导出数据文件"
+                app:sRightIconRes="@drawable/next_item"
+                app:sRightLines="3"
+                app:sRightTextColor="@color/content" />
+
+            <TextView
+                android:id="@+id/json_path_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/activity_list_height"
+                android:padding="@dimen/dp_10"></TextView>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="0dp"
+        android:layout_marginStart="0dp"
+        android:background="?android:attr/windowBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/navigation" />
+
+</android.support.constraint.ConstraintLayout>

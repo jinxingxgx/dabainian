@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".UploadActivity">
+
+    <com.wuhenzhizao.titlebar.widget.CommonTitleBar
+        android:id="@+id/titlebar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:centerText="上传图片"
+        app:centerTextColor="@color/white"
+        app:centerType="textView"
+        app:fillStatusBar="true"
+        app:leftDrawable="@drawable/back_white"
+        app:leftDrawablePadding="0dp"
+        app:leftText="返回"
+        app:leftTextColor="@color/white"
+        app:leftType="textView"
+        app:statusBarColor="@color/colorPrimary"
+        app:statusBarMode="light"
+        app:titleBarColor="@color/colorPrimary" />
+
+    <ImageView
+        android:id="@+id/show_pic_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/pwd_stv"
+        android:layout_below="@+id/titlebar"
+        android:layout_marginBottom="@dimen/dp_10" />
+
+    <com.allen.library.SuperTextView
+        android:id="@+id/pwd_stv"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_list_height"
+        android:layout_above="@+id/save_btn"
+        app:sLeftTextString="设置密码"
+        app:sRightIconRes="@drawable/next_item"
+        app:sRightTextColor="@color/content"
+        app:sRightTextString="未设置" />
+
+    <com.allen.library.SuperButton
+        android:id="@+id/save_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/dp_10"
+        android:text="保存"
+        android:textColor="@color/white"
+        app:sCornersRadius="@dimen/dp_10"
+        app:sSolidColor="@color/colorPrimary" />
+</RelativeLayout>
