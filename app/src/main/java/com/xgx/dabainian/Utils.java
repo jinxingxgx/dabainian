@@ -1,7 +1,13 @@
 package com.xgx.dabainian;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
 
+import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.TimeUtils;
 
 import java.io.BufferedReader;
@@ -13,12 +19,68 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by xgx on 2018/12/13 for MusicPlayDemo
  */
 public class Utils {
+    private static final String SDCARD_ROOT = Environment.getExternalStorageState().toString();
+
     private static final boolean isDemo = false;
+
+    public static List<FileBean> getKeyFiles(Context context, String keyword) {
+        List<FileBean> list = new ArrayList<>();
+        File[] files = new File(Environment.getExternalStorageState()).listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (FileUtils.getFileName(files[i]).equals(keyword)) {
+                FileBean bean = new FileBean();
+                bean.setName(FileUtils.getFileName(files[i]));
+                bean.setPath(files[i].getPath());
+                list.add(bean);
+            }
+        }
+        return list;
+    }
+
+
+    public static List<FileBean> queryFiles(Context context, String keyword) {
+        String[] projection = new String[]{MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.DATA,
+                MediaStore.Files.FileColumns.SIZE
+        };
+
+        Cursor cursor = context.getContentResolver().query(
+                Uri.parse("content://media/external/file"),
+                projection,
+                MediaStore.Files.FileColumns.DATA + " like ?",
+                new String[]{"%json"},
+                MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC");
+
+        List<FileBean> list = new ArrayList<>();
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                int dataindex = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA);
+                do {
+                    String path = cursor.getString(dataindex);
+                    int dot = path.lastIndexOf("/");
+                    String name = path.substring(dot + 1);
+                    if (name.lastIndexOf(".") > 0)
+                        name = name.substring(0, name.lastIndexOf("."));
+                    if (!name.startsWith(".") && name.equals(keyword)) {
+                        FileBean books = new FileBean();
+                        books.setName(name);
+                        books.setPath(path);
+                        list.add(books);
+                    }
+                } while (cursor.moveToNext());
+            }
+        }
+        cursor.close();
+        return list;
+    }
+
 
     public static boolean checkIsDemo() {
         if (isDemo) {

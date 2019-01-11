@@ -22,11 +22,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.allen.library.SuperButton;
 import com.allen.library.SuperTextView;
 import com.blankj.utilcode.util.EncodeUtils;
 import com.blankj.utilcode.util.EncryptUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
+import com.ess.filepicker.FilePicker;
+import com.ess.filepicker.model.EssFile;
+import com.ess.filepicker.util.Const;
+import com.ess.filepicker.util.FileUtils;
 import com.hss01248.dialog.StyledDialog;
 import com.hss01248.dialog.interfaces.MyDialogListener;
 import com.wuhenzhizao.titlebar.widget.CommonTitleBar;
@@ -43,6 +48,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.bingoogolapple.photopicker.activity.BGAPhotoPickerActivity;
+import gdut.bsx.share2.FileUtil;
+import gdut.bsx.share2.Share2;
+import gdut.bsx.share2.ShareContentType;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -68,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
     SuperTextView exportStv;
     @BindView(R.id.updb_stv)
     SuperTextView updbStv;
+    @BindView(R.id.share_btn)
+    SuperButton shareBtn;
     @BindView(R.id.json_path_tv)
     TextView jsonPathTv;
     private Handler mhandler;
@@ -164,9 +174,11 @@ public class MainActivity extends AppCompatActivity {
         if (isAdmin) {
             pwdStv.setSwitchIsChecked(true);
             exportStv.setVisibility(View.VISIBLE);
+            shareBtn.setVisibility(View.VISIBLE);
         } else {
             pwdStv.setSwitchIsChecked(false);
             exportStv.setVisibility(View.GONE);
+            shareBtn.setVisibility(View.GONE);
 
         }
         if (MyApplication.getDaoInstant().getPicInfoDao().count() > 0) {
@@ -201,10 +213,12 @@ public class MainActivity extends AppCompatActivity {
                                         ToastUtils.showShort("密码输入成功，开启管理员模式");
                                         isAdmin = true;
                                         exportStv.setVisibility(View.VISIBLE);
+                                        shareBtn.setVisibility(View.VISIBLE);
 
                                         MyApplication.getInstance().getSP().edit().putBoolean("isAdmin", true).apply();
                                     } else {
                                         exportStv.setVisibility(View.GONE);
+                                        shareBtn.setVisibility(View.GONE);
                                         ToastUtils.showShort("密码校验失败");
                                         pwdStv.setSwitchIsChecked(false);
                                     }
@@ -256,6 +270,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK) {
+            return;
+        }
         if (resultCode == RESULT_OK && requestCode == RC_CHOOSE_PHOTO) {
             final List<String> selectedPhotos = BGAPhotoPickerActivity.getSelectedPhotos(data);
             if (selectedPhotos != null && selectedPhotos.size() > 0) {
@@ -263,18 +280,28 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, UploadActivity.class).putExtra("path", selectedPhotos.get(0)));
             }
         }
-        if (requestCode == 1112 && null != data) {
-            Uri uri = data.getData();
-            try {
-                String filepath = MyFileEntity.getPath(this, uri);
-                List<PicInfo> picInfos = JSON.parseArray(Utils.getJson(filepath, this), PicInfo.class);
-                MyApplication.getDaoInstant().getPicInfoDao().deleteAll();
-                MyApplication.getDaoInstant().getPicInfoDao().insertInTx(picInfos);
+        if (requestCode == 1002) {
 
-                ToastUtils.showShort("数据导入成功");
-                onResume();
+            try {
+                ArrayList<EssFile> essFileList = data.getParcelableArrayListExtra(Const.EXTRA_RESULT_SELECTION);
+                if (essFileList != null & essFileList.size() > 0) {
+                    if (essFileList.get(0).getName().equals("大拜年.txt")) {
+                        List<PicInfo> picInfos = JSON.parseArray(Utils.getJson(essFileList.get(0).getAbsolutePath(), this), PicInfo.class);
+                        MyApplication.getDaoInstant().getPicInfoDao().deleteAll();
+                        MyApplication.getDaoInstant().getPicInfoDao().insertInTx(picInfos);
+                        ToastUtils.showShort("数据导入成功");
+                        onResume();
+                    } else {
+                        ToastUtils.showShort("请导入《大拜年.txt》文件");
+                    }
+
+                } else {
+                    ToastUtils.showShort("请导入《大拜年.txt》文件");
+                }
+
+
             } catch (Exception e) {
-                ToastUtils.showShort("请导入数据文件");
+                ToastUtils.showShort("请导入正确数据文件");
             }
 
         }
@@ -287,13 +314,25 @@ public class MainActivity extends AppCompatActivity {
     private static final String SDCARD_ROOT = Environment.getExternalStorageDirectory().toString();
     //查询
 
-    @OnClick({R.id.updb_stv, R.id.uppic_stv, R.id.titlebar, R.id.export_stv})
+    @OnClick({R.id.share_btn, R.id.updb_stv, R.id.uppic_stv, R.id.titlebar, R.id.export_stv})
     public void onViewClicked(View view) {
         if (Utils.checkIsDemo()) {
             ToastUtils.showShort("你已超出试用期");
             return;
         }
         switch (view.getId()) {
+            case R.id.share_btn:
+                if (!new File(jsonPathTv.getText().toString()).exists()) {
+                    ToastUtils.showShort("分享文件不存在");
+                    return;
+                }
+                new Share2.Builder(this)
+                        .setContentType(ShareContentType.FILE)
+                        .setShareFileUri(FileUtil.getFileUri(MainActivity.this, ShareContentType.FILE, new File(jsonPathTv.getText().toString())))
+                        .setTitle("数据文件分享")
+                        .build()
+                        .shareBySystem();
+                break;
             case R.id.export_stv:
                 long size = MyApplication.getDaoInstant().getPicInfoDao().count();
                 List<PicInfo> infos = new ArrayList<>();
@@ -305,30 +344,32 @@ public class MainActivity extends AppCompatActivity {
                     List<PicInfo> picInfos = builder.list();
                     infos.addAll(picInfos);
                 }
-                File dir = new File(SDCARD_ROOT + File.separator + "dabainian" + File.separator);
+                File dir = new File(SDCARD_ROOT + File.separator + "大拜年" + File.separator);
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
-                String path = dir.toString() + File.separator + "dabainian.json";
+                String path = dir.toString() + File.separator + "大拜年.txt";
                 Utils.writeStringToFile(JSON.toJSONString(infos), path);
                 jsonPathTv.setText(path);
                 ToastUtils.showShort("导出成功");
                 break;
             case R.id.updb_stv:
-                String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
-                if (EasyPermissions.hasPermissions(this, perms)) {
-                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                    intent.setType("*/*");
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    try {
-                        startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"), 1112);
-                    } catch (ActivityNotFoundException ex) {
-                        Toast.makeText(MainActivity.this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    EasyPermissions.requestPermissions(this, "文件选择需要以下权限:\n\n1.访问设备上的文件夹\n\n2.写文件", PRC_PHOTO_PICKER, perms);
-
-                }
+                FilePicker.from(this)
+                        .chooseForMimeType()
+                        .setMaxCount(1)
+                        .setSortType(FileUtils.BY_TIME_DESC + "")
+                        .setFileTypes("txt")
+                        .requestCode(1002)
+                        .start();
+//                String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+//                if (EasyPermissions.hasPermissions(this, perms)) {
+//                    Intent intent = new Intent(MainActivity.this, SelectFileActivity.class);
+//                    intent.putExtra("ARG_FileType","json");
+//                    startActivityForResult(intent, 1112);
+//                } else {
+//                    EasyPermissions.requestPermissions(this, "文件选择需要以下权限:\n\n1.访问设备上的文件夹\n\n2.写文件", PRC_PHOTO_PICKER, perms);
+//
+//                }
 
 
                 break;

@@ -95,6 +95,16 @@
                 android:minHeight="@dimen/activity_list_height"
                 android:padding="@dimen/dp_10"></TextView>
 
+            <com.allen.library.SuperButton
+                android:id="@+id/share_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_margin="@dimen/dp_10"
+                android:text="分享文件"
+                android:textColor="@color/white"
+                app:sCornersRadius="@dimen/dp_10"
+                app:sSolidColor="@color/colorPrimary" />
         </LinearLayout>
     </LinearLayout>
 
