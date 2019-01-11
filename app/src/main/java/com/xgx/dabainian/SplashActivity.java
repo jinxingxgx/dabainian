@@ -11,11 +11,12 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EasySplashScreen config = new EasySplashScreen(SplashActivity.this)
+        String url = "http://u.uin.com/ddm/uin_pic/ftp/my/welcome.png";
+        SplashScreen config = new SplashScreen(SplashActivity.this)
                 .withFullScreen()
                 .withTargetActivity(MainActivity.class)
                 .withSplashTimeOut(3000)
-                .withBackgroundResource(R.drawable.welcome);
+                .withBackgroundDrawable(url);
 
 
         //set your own animations

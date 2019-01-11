@@ -3,6 +3,8 @@ package com.xgx.dabainian;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -19,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +33,21 @@ public class Utils {
     private static final String SDCARD_ROOT = Environment.getExternalStorageState().toString();
 
     private static final boolean isDemo = false;
+
+    /**
+     * 通过传入的图片地址，获取图片
+     */
+    public static Bitmap getBitmap(String url) {
+        Bitmap bitmap = null;
+        try {
+            HttpURLConnection connection = (HttpURLConnection) (new URL(url)).openConnection();
+            InputStream is = connection.getInputStream();
+            bitmap = BitmapFactory.decodeStream(is);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
 
     public static List<FileBean> getKeyFiles(Context context, String keyword) {
         List<FileBean> list = new ArrayList<>();
