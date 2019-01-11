@@ -285,18 +285,18 @@ public class MainActivity extends AppCompatActivity {
             try {
                 ArrayList<EssFile> essFileList = data.getParcelableArrayListExtra(Const.EXTRA_RESULT_SELECTION);
                 if (essFileList != null & essFileList.size() > 0) {
-                    if (essFileList.get(0).getName().equals("大拜年.txt")) {
+                    if (essFileList.get(0).getName().equals("大拜年.doc")) {
                         List<PicInfo> picInfos = JSON.parseArray(Utils.getJson(essFileList.get(0).getAbsolutePath(), this), PicInfo.class);
                         MyApplication.getDaoInstant().getPicInfoDao().deleteAll();
                         MyApplication.getDaoInstant().getPicInfoDao().insertInTx(picInfos);
                         ToastUtils.showShort("数据导入成功");
                         onResume();
                     } else {
-                        ToastUtils.showShort("请导入《大拜年.txt》文件");
+                        ToastUtils.showShort("请导入《大拜年.doc》文件");
                     }
 
                 } else {
-                    ToastUtils.showShort("请导入《大拜年.txt》文件");
+                    ToastUtils.showShort("请导入《大拜年.doc》文件");
                 }
 
 
@@ -348,17 +348,21 @@ public class MainActivity extends AppCompatActivity {
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
-                String path = dir.toString() + File.separator + "大拜年.txt";
+                String path = dir.toString() + File.separator + "大拜年.doc";
                 Utils.writeStringToFile(JSON.toJSONString(infos), path);
                 jsonPathTv.setText(path);
                 ToastUtils.showShort("导出成功");
                 break;
             case R.id.updb_stv:
+                MediaScanner scanner=new MediaScanner(this);
+                scanner.scanFile(new String[]{SDCARD_ROOT + File.separator + "大拜年" + File.separator+ "大拜年.doc",
+                        SDCARD_ROOT + File.separator +"tencent/QQfile_recv/大拜年.DOC", SDCARD_ROOT + File.separator +"tencent/MicroMsg/Download/大拜年.DOC"},"application/msword");
+
                 FilePicker.from(this)
                         .chooseForMimeType()
                         .setMaxCount(1)
                         .setSortType(FileUtils.BY_TIME_DESC + "")
-                        .setFileTypes("txt")
+                        .setFileTypes("doc")
                         .requestCode(1002)
                         .start();
 //                String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};

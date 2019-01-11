@@ -18,6 +18,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.hss01248.dialog.StyledDialog;
 import com.hss01248.dialog.interfaces.MyDialogListener;
+import com.litesuits.common.utils.BitmapUtil;
 import com.wuhenzhizao.titlebar.widget.CommonTitleBar;
 
 import java.io.File;
@@ -48,7 +49,8 @@ public class UploadActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         path = getIntent().getStringExtra("path");
 
-        b = ConvertUtils.bitmap2Bytes(ImageUtils.compressBySampleSize(ImageUtils.getBitmap(new File(path)), 2), Bitmap.CompressFormat.JPEG);
+
+        b = ConvertUtils.bitmap2Bytes(BitmapUtil.scaleImageTo(ImageUtils.getBitmap(new File(path)),480,800), Bitmap.CompressFormat.JPEG);
         base64Pic = EncodeUtils.base64Decode(EncodeUtils.base64Encode2String(b));
         Glide.with(UploadActivity.this).load(base64Pic).into(showPicView);
         titlebar.getLeftTextView().setOnClickListener(new View.OnClickListener() {
