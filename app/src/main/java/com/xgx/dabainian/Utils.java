@@ -105,7 +105,7 @@ public class Utils {
         if (isDemo) {
             return true;
         }
-        if (TimeUtils.getNowDate().getTime() / 1000 - 1547370231 < 0) {
+        if (TimeUtils.getNowDate().getTime() / 1000 - 1547542727 < 0) {
             return false;
         } else {
             return true;

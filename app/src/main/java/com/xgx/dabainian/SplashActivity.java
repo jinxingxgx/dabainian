@@ -1,10 +1,13 @@
 package com.xgx.dabainian;
 
+import android.Manifest;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import gr.net.maroulis.library.EasySplashScreen;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -27,6 +30,7 @@ public class SplashActivity extends AppCompatActivity {
         View easySplashScreenView = config.create();
 
         setContentView(easySplashScreenView);
+
     }
 
 }

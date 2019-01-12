@@ -26,6 +26,7 @@ import com.allen.library.SuperButton;
 import com.allen.library.SuperTextView;
 import com.blankj.utilcode.util.EncodeUtils;
 import com.blankj.utilcode.util.EncryptUtils;
+import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.ess.filepicker.FilePicker;
@@ -34,6 +35,7 @@ import com.ess.filepicker.util.Const;
 import com.ess.filepicker.util.FileUtils;
 import com.hss01248.dialog.StyledDialog;
 import com.hss01248.dialog.interfaces.MyDialogListener;
+import com.hss01248.dialog.interfaces.MyItemDialogListener;
 import com.wuhenzhizao.titlebar.widget.CommonTitleBar;
 
 import org.greenrobot.greendao.query.QueryBuilder;
@@ -154,6 +156,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    @AfterPermissionGranted(PRC_PHOTO_PICKER)
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -173,13 +177,8 @@ public class MainActivity extends AppCompatActivity {
         pwdStv.setVisibility(View.VISIBLE);
         if (isAdmin) {
             pwdStv.setSwitchIsChecked(true);
-            exportStv.setVisibility(View.VISIBLE);
-            shareBtn.setVisibility(View.VISIBLE);
         } else {
             pwdStv.setSwitchIsChecked(false);
-            exportStv.setVisibility(View.GONE);
-            shareBtn.setVisibility(View.GONE);
-
         }
         if (MyApplication.getDaoInstant().getPicInfoDao().count() > 0) {
             titlebar.getRightTextView().setText("删除");
@@ -242,6 +241,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+        EasyPermissions.hasPermissions(this, perms);
     }
 
 
@@ -270,6 +271,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1112 && null != data) {
+            Uri uri = data.getData();
+            try {
+                String filepath = MyFileEntity.getPath(this, uri);
+                List<PicInfo> picInfos = JSON.parseArray(Utils.getJson(filepath, this), PicInfo.class);
+                MyApplication.getDaoInstant().getPicInfoDao().deleteAll();
+                MyApplication.getDaoInstant().getPicInfoDao().insertInTx(picInfos);
+
+                ToastUtils.showShort("数据导入成功");
+                onResume();
+            } catch (Exception e) {
+                ToastUtils.showShort("请导入正确数据文件");
+            }
+
+        }
         if (resultCode != RESULT_OK) {
             return;
         }
@@ -280,23 +296,21 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, UploadActivity.class).putExtra("path", selectedPhotos.get(0)));
             }
         }
+
+
         if (requestCode == 1002) {
 
             try {
                 ArrayList<EssFile> essFileList = data.getParcelableArrayListExtra(Const.EXTRA_RESULT_SELECTION);
                 if (essFileList != null & essFileList.size() > 0) {
-                    if (essFileList.get(0).getName().equals("大拜年.doc")) {
-                        List<PicInfo> picInfos = JSON.parseArray(Utils.getJson(essFileList.get(0).getAbsolutePath(), this), PicInfo.class);
-                        MyApplication.getDaoInstant().getPicInfoDao().deleteAll();
-                        MyApplication.getDaoInstant().getPicInfoDao().insertInTx(picInfos);
-                        ToastUtils.showShort("数据导入成功");
-                        onResume();
-                    } else {
-                        ToastUtils.showShort("请导入《大拜年.doc》文件");
-                    }
+                    List<PicInfo> picInfos = JSON.parseArray(Utils.getJson(essFileList.get(0).getAbsolutePath(), this), PicInfo.class);
+                    MyApplication.getDaoInstant().getPicInfoDao().deleteAll();
+                    MyApplication.getDaoInstant().getPicInfoDao().insertInTx(picInfos);
+                    ToastUtils.showShort("数据导入成功");
+                    onResume();
 
                 } else {
-                    ToastUtils.showShort("请导入《大拜年.doc》文件");
+                    ToastUtils.showShort("请导入《大拜年》文件");
                 }
 
 
@@ -326,6 +340,10 @@ public class MainActivity extends AppCompatActivity {
                     ToastUtils.showShort("分享文件不存在");
                     return;
                 }
+                if (MyApplication.getDaoInstant().getPicInfoDao().count() < 8) {
+                    ToastUtils.showShort("满8张图片才能上传");
+                    return;
+                }
                 new Share2.Builder(this)
                         .setContentType(ShareContentType.FILE)
                         .setShareFileUri(FileUtil.getFileUri(MainActivity.this, ShareContentType.FILE, new File(jsonPathTv.getText().toString())))
@@ -348,23 +366,50 @@ public class MainActivity extends AppCompatActivity {
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
-                String path = dir.toString() + File.separator + "大拜年.doc";
+                String path = dir.toString() + File.separator + "大拜年" + TimeUtils.getNowMills() + ".doc";
                 Utils.writeStringToFile(JSON.toJSONString(infos), path);
                 jsonPathTv.setText(path);
                 ToastUtils.showShort("导出成功");
                 break;
             case R.id.updb_stv:
-                MediaScanner scanner=new MediaScanner(this);
-                scanner.scanFile(new String[]{SDCARD_ROOT + File.separator + "大拜年" + File.separator+ "大拜年.doc",
-                        SDCARD_ROOT + File.separator +"tencent/QQfile_recv/大拜年.DOC", SDCARD_ROOT + File.separator +"tencent/MicroMsg/Download/大拜年.DOC"},"application/msword");
+                List<String> datas = new ArrayList<>();
+                datas.add("系统文件管理器");
+                datas.add("快速查找");
 
-                FilePicker.from(this)
-                        .chooseForMimeType()
-                        .setMaxCount(1)
-                        .setSortType(FileUtils.BY_TIME_DESC + "")
-                        .setFileTypes("doc")
-                        .requestCode(1002)
-                        .start();
+                StyledDialog.buildBottomItemDialog(datas, "取消", new MyItemDialogListener() {
+                    @Override
+                    public void onItemClick(CharSequence charSequence, int i) {
+                        if (i == 0) {
+                            String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+                            if (EasyPermissions.hasPermissions(MainActivity.this, perms)) {
+                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                intent.setType("*/*");
+                                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                                try {
+                                    startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"), 1112);
+                                } catch (ActivityNotFoundException ex) {
+                                    Toast.makeText(MainActivity.this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                EasyPermissions.requestPermissions(MainActivity.this, "文件选择需要以下权限:\n\n1.访问设备上的文件夹\n\n2.写文件", PRC_PHOTO_PICKER, perms);
+
+                            }
+                        } else if (i == 1) {
+                            MediaScanner scanner = new MediaScanner(MainActivity.this);
+                            scanner.scanFile(new String[]{SDCARD_ROOT + File.separator + "大拜年" + File.separator,
+                                    SDCARD_ROOT + File.separator + "tencent/QQfile_recv", SDCARD_ROOT + File.separator + "tencent/MicroMsg/Download"}, "application/msword");
+
+                            FilePicker.from(MainActivity.this)
+                                    .chooseForMimeType()
+                                    .setSortType(FileUtils.BY_TIME_DESC + "")
+                                    .setFileTypes("doc")
+                                    .requestCode(1002)
+                                    .isSingle()
+                                    .start();
+                        }
+                    }
+                }).show();
+
 //                String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
 //                if (EasyPermissions.hasPermissions(this, perms)) {
 //                    Intent intent = new Intent(MainActivity.this, SelectFileActivity.class);

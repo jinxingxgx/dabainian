@@ -1,7 +1,12 @@
 package com.xgx.dabainian;
+
 import android.content.Context;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+
+import com.blankj.utilcode.util.FileUtils;
+
+import java.io.File;
 
 public class MediaScanner {
 
@@ -14,9 +19,10 @@ public class MediaScanner {
     private String fileType = null;
 
     private String[] filePaths = null;
+
     /**
      * 然后调用MediaScanner.scanFile("/sdcard/2.mp3");
-     * */
+     */
     public MediaScanner(Context context) {
         //创建MusicSannerClient
         if (client == null) {
@@ -34,25 +40,44 @@ public class MediaScanner {
             MediaScannerConnection.MediaScannerConnectionClient {
 
         public void onMediaScannerConnected() {
+            try {
+                if (filePath != null) {
+                    if (FileUtils.isDir(filePath)) {
+                        File[] files = FileUtils.getFileByPath(filePath).listFiles();
+                        for (int i = 0; i < files.length; i++) {
+                            mediaScanConn.scanFile(files[i].getAbsolutePath(), fileType);
 
-            if(filePath != null){
+                        }
 
-                mediaScanConn.scanFile(filePath, fileType);
-            }
-
-            if(filePaths != null){
-
-                for(String file: filePaths){
-
-                    mediaScanConn.scanFile(file, fileType);
+                    } else {
+                        mediaScanConn.scanFile(filePath, fileType);
+                    }
                 }
+
+                if (filePaths != null) {
+
+                    for (String file : filePaths) {
+                        if (FileUtils.isDir(file)) {
+                            File[] files = FileUtils.getFileByPath(file).listFiles();
+                            for (int i = 0; i < files.length; i++) {
+                                mediaScanConn.scanFile(files[i].getAbsolutePath(), fileType);
+
+                            }
+
+                        } else {
+                            mediaScanConn.scanFile(file, fileType);
+                        }
+                    }
+                }
+
+                filePath = null;
+
+                fileType = null;
+
+                filePaths = null;
+            } catch (Exception e) {
             }
 
-            filePath = null;
-
-            fileType = null;
-
-            filePaths = null;
         }
 
         public void onScanCompleted(String path, Uri uri) {
@@ -64,10 +89,10 @@ public class MediaScanner {
 
     /**
      * 扫描文件标签信息
-     * @param filePath 文件路径 eg:/sdcard/MediaPlayer/dahai.mp3
+     *
      * @param fileType 文件类型 eg: audio/mp3  media/*  application/ogg
-     * */
-    public void scanFile(String filepath,String fileType) {
+     */
+    public void scanFile(String filepath, String fileType) {
 
         this.filePath = filepath;
 
@@ -75,11 +100,12 @@ public class MediaScanner {
         //连接之后调用MusicSannerClient的onMediaScannerConnected()方法
         mediaScanConn.connect();
     }
+
     /**
      * @param filePaths 文件路径
-     * @param fileType 文件类型
-     * */
-    public void scanFile(String[] filePaths,String fileType){
+     * @param fileType  文件类型
+     */
+    public void scanFile(String[] filePaths, String fileType) {
 
         this.filePaths = filePaths;
 
