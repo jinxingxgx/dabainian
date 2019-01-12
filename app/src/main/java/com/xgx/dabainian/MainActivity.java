@@ -211,13 +211,9 @@ public class MainActivity extends AppCompatActivity {
                                     if (EncryptUtils.encryptMD5ToString(adminPwd).equals(EncryptUtils.encryptMD5ToString("admin111111"))) {
                                         ToastUtils.showShort("密码输入成功，开启管理员模式");
                                         isAdmin = true;
-                                        exportStv.setVisibility(View.VISIBLE);
-                                        shareBtn.setVisibility(View.VISIBLE);
 
                                         MyApplication.getInstance().getSP().edit().putBoolean("isAdmin", true).apply();
                                     } else {
-                                        exportStv.setVisibility(View.GONE);
-                                        shareBtn.setVisibility(View.GONE);
                                         ToastUtils.showShort("密码校验失败");
                                         pwdStv.setSwitchIsChecked(false);
                                     }

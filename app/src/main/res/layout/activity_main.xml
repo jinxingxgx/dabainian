@@ -82,7 +82,6 @@
                 android:id="@+id/export_stv"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/activity_list_height"
-                android:visibility="gone"
                 app:sLeftTextString="导出数据文件"
                 app:sRightIconRes="@drawable/next_item"
                 app:sRightLines="3"
