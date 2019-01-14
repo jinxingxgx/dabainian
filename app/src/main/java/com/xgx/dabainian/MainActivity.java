@@ -24,8 +24,10 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.allen.library.SuperButton;
 import com.allen.library.SuperTextView;
+import com.blankj.utilcode.util.CacheDiskUtils;
 import com.blankj.utilcode.util.EncodeUtils;
 import com.blankj.utilcode.util.EncryptUtils;
+import com.blankj.utilcode.util.SPUtils;
 import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
@@ -92,24 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_home:
                     picLayout.setVisibility(View.VISIBLE);
                     settingLayout.setVisibility(View.GONE);
-                    if (MyApplication.getDaoInstant().getPicInfoDao().count() > 0) {
-                        titlebar.getRightTextView().setText("删除");
-                        titlebar.getRightTextView().setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (isAdmin) {
-                                    deletePic();
-                                } else {
-                                    //如果是普通模式，需要判断 当前几张照片
-                                    if (MyApplication.getDaoInstant().getPicInfoDao().count() == 8) {
-                                        deletePic();
-                                    } else {
-                                        ToastUtils.showShort("必须满8张图片，才可以删除");
-                                    }
-                                }
-                            }
-                        });
-                    }
+                    setDelMethod();
 
                     return true;
                 case R.id.navigation_dashboard:
@@ -126,6 +111,33 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     };
+
+    private void setDelMethod() {
+        if (MyApplication.getDaoInstant().getPicInfoDao().count() > 0) {
+            titlebar.getRightTextView().setText("删除");
+            titlebar.getRightTextView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isAdmin) {
+                        deletePic();
+                    } else {
+                        //如果是普通模式，需要判断 当前几张照片
+                        if (SPUtils.getInstance().getBoolean("isDel", false)) {
+                            ToastUtils.showShort("普通有用户只能删除一张图片");
+                        } else {
+                            if (MyApplication.getDaoInstant().getPicInfoDao().count() == 8) {
+                                deletePic();
+                                SPUtils.getInstance().put("isDel", true);
+                            } else {
+                                ToastUtils.showShort("必须满8张图片，才可以删除");
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
     private TimerTask task;
     private String adminPwd = "";
     private boolean isAdmin;
@@ -180,24 +192,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             pwdStv.setSwitchIsChecked(false);
         }
-        if (MyApplication.getDaoInstant().getPicInfoDao().count() > 0) {
-            titlebar.getRightTextView().setText("删除");
-            titlebar.getRightTextView().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isAdmin) {
-                        deletePic();
-                    } else {
-                        //如果是普通模式，需要判断 当前几张照片
-                        if (MyApplication.getDaoInstant().getPicInfoDao().count() == 8) {
-                            deletePic();
-                        } else {
-                            ToastUtils.showShort("必须满8张图片，才可以删除");
-                        }
-                    }
-                }
-            });
-        }
+        setDelMethod();
         pwdStv.setSwitchCheckedChangeListener(new SuperTextView.OnSwitchCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -214,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         MyApplication.getInstance().getSP().edit().putBoolean("isAdmin", true).apply();
                                     } else {
+                                        isAdmin = false;
                                         ToastUtils.showShort("密码校验失败");
                                         pwdStv.setSwitchIsChecked(false);
                                     }
@@ -368,43 +364,44 @@ public class MainActivity extends AppCompatActivity {
                 ToastUtils.showShort("导出成功");
                 break;
             case R.id.updb_stv:
-                List<String> datas = new ArrayList<>();
-                datas.add("系统文件管理器");
-                datas.add("快速查找");
+                MediaScanner scanner = new MediaScanner(MainActivity.this);
+                scanner.scanFile(new String[]{SDCARD_ROOT + File.separator + "大拜年" + File.separator,
+                        SDCARD_ROOT + File.separator + "tencent/QQfile_recv", SDCARD_ROOT + File.separator + "tencent/MicroMsg/Download"}, "application/msword");
 
-                StyledDialog.buildBottomItemDialog(datas, "取消", new MyItemDialogListener() {
-                    @Override
-                    public void onItemClick(CharSequence charSequence, int i) {
-                        if (i == 0) {
-                            String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
-                            if (EasyPermissions.hasPermissions(MainActivity.this, perms)) {
-                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                                intent.setType("*/*");
-                                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                                try {
-                                    startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"), 1112);
-                                } catch (ActivityNotFoundException ex) {
-                                    Toast.makeText(MainActivity.this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
-                                }
-                            } else {
-                                EasyPermissions.requestPermissions(MainActivity.this, "文件选择需要以下权限:\n\n1.访问设备上的文件夹\n\n2.写文件", PRC_PHOTO_PICKER, perms);
-
-                            }
-                        } else if (i == 1) {
-                            MediaScanner scanner = new MediaScanner(MainActivity.this);
-                            scanner.scanFile(new String[]{SDCARD_ROOT + File.separator + "大拜年" + File.separator,
-                                    SDCARD_ROOT + File.separator + "tencent/QQfile_recv", SDCARD_ROOT + File.separator + "tencent/MicroMsg/Download"}, "application/msword");
-
-                            FilePicker.from(MainActivity.this)
-                                    .chooseForMimeType()
-                                    .setSortType(FileUtils.BY_TIME_DESC + "")
-                                    .setFileTypes("doc")
-                                    .requestCode(1002)
-                                    .isSingle()
-                                    .start();
-                        }
-                    }
-                }).show();
+                FilePicker.from(MainActivity.this)
+                        .chooseForMimeType()
+                        .setSortType(FileUtils.BY_TIME_DESC + "")
+                        .setFileTypes("doc")
+                        .requestCode(1002)
+                        .isSingle()
+                        .start();
+//                List<String> datas = new ArrayList<>();
+//                datas.add("系统文件管理器");
+//                datas.add("快速查找");
+//
+//                StyledDialog.buildBottomItemDialog(datas, "取消", new MyItemDialogListener() {
+//                    @Override
+//                    public void onItemClick(CharSequence charSequence, int i) {
+//                        if (i == 0) {
+//                            String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
+//                            if (EasyPermissions.hasPermissions(MainActivity.this, perms)) {
+//                                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//                                intent.setType("*/*");
+//                                intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                                try {
+//                                    startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"), 1112);
+//                                } catch (ActivityNotFoundException ex) {
+//                                    Toast.makeText(MainActivity.this, "请安装文件管理器", Toast.LENGTH_SHORT).show();
+//                                }
+//                            } else {
+//                                EasyPermissions.requestPermissions(MainActivity.this, "文件选择需要以下权限:\n\n1.访问设备上的文件夹\n\n2.写文件", PRC_PHOTO_PICKER, perms);
+//
+//                            }
+//                        } else if (i == 1) {
+//
+//                        }
+//                    }
+//                }).show();
 
 //                String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA};
 //                if (EasyPermissions.hasPermissions(this, perms)) {
