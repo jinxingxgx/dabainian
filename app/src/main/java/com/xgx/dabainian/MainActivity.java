@@ -3,12 +3,14 @@ package com.xgx.dabainian;
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.content.ContextCompat;
@@ -31,6 +33,8 @@ import com.blankj.utilcode.util.SPUtils;
 import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.ess.filepicker.FilePicker;
 import com.ess.filepicker.model.EssFile;
 import com.ess.filepicker.util.Const;
@@ -38,6 +42,7 @@ import com.ess.filepicker.util.FileUtils;
 import com.hss01248.dialog.StyledDialog;
 import com.hss01248.dialog.interfaces.MyDialogListener;
 import com.hss01248.dialog.interfaces.MyItemDialogListener;
+import com.litesuits.common.utils.BitmapUtil;
 import com.wuhenzhizao.titlebar.widget.CommonTitleBar;
 
 import org.greenrobot.greendao.query.QueryBuilder;
@@ -317,15 +322,14 @@ public class MainActivity extends AppCompatActivity {
     private Timer delayTimer;
     private long interval = 500;
     private int count = 0;
-    private static final String SDCARD_ROOT = Environment.getExternalStorageDirectory().toString();
     //查询
 
     @OnClick({R.id.share_btn, R.id.updb_stv, R.id.uppic_stv, R.id.titlebar, R.id.export_stv})
     public void onViewClicked(View view) {
-        if (Utils.checkIsDemo()) {
-            ToastUtils.showShort("你已超出试用期");
-            return;
-        }
+//        if (Utils.checkIsDemo()) {
+//            ToastUtils.showShort("你已超出试用期");
+//            return;
+//        }
         switch (view.getId()) {
             case R.id.share_btn:
                 if (!new File(jsonPathTv.getText().toString()).exists()) {
@@ -354,7 +358,7 @@ public class MainActivity extends AppCompatActivity {
                     List<PicInfo> picInfos = builder.list();
                     infos.addAll(picInfos);
                 }
-                File dir = new File(SDCARD_ROOT + File.separator + "大拜年" + File.separator);
+                File dir = new File(Environment.getExternalStorageDirectory() + File.separator + "大拜年" + File.separator);
                 if (!dir.exists()) {
                     dir.mkdir();
                 }
@@ -365,8 +369,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.updb_stv:
                 MediaScanner scanner = new MediaScanner(MainActivity.this);
-                scanner.scanFile(new String[]{SDCARD_ROOT + File.separator + "大拜年" + File.separator,
-                        SDCARD_ROOT + File.separator + "tencent/QQfile_recv", SDCARD_ROOT + File.separator + "tencent/MicroMsg/Download"}, "application/msword");
+                scanner.scanFile(new String[]{Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "大拜年" + File.separator,
+                        Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "tencent/QQfile_recv", Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "tencent/MicroMsg/Download"}, "application/msword");
 
                 FilePicker.from(MainActivity.this)
                         .chooseForMimeType()
@@ -515,6 +519,8 @@ public class MainActivity extends AppCompatActivity {
                         if (picInfos != null && picInfos.size() > 0) {
                             if (EncryptUtils.encryptMD5ToString(pwd).equals(picInfos.get(0).getPwd())) {
                                 MyApplication.getDaoInstant().getPicInfoDao().deleteByKey(picInfos.get(0).getId());
+                                byte[] base64Pic = EncodeUtils.base64Decode(picInfos.get(0).getPic());
+                                Utils.GenerateImage(picInfos.get(0).getPic());
                                 onResume();
                                 ToastUtils.showShort("删除成功");
                             } else {
