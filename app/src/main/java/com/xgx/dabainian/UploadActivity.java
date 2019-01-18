@@ -50,7 +50,7 @@ public class UploadActivity extends AppCompatActivity {
         path = getIntent().getStringExtra("path");
 
 
-        b = ConvertUtils.bitmap2Bytes(BitmapUtil.scaleImageTo(ImageUtils.getBitmap(new File(path)),480,800), Bitmap.CompressFormat.JPEG);
+        b = ConvertUtils.bitmap2Bytes(BitmapUtil.scaleImageTo(ImageUtils.getBitmap(new File(path)), 480, 800), Bitmap.CompressFormat.JPEG);
         base64Pic = EncodeUtils.base64Decode(EncodeUtils.base64Encode2String(b));
         Glide.with(UploadActivity.this).load(base64Pic).into(showPicView);
         titlebar.getLeftTextView().setOnClickListener(new View.OnClickListener() {

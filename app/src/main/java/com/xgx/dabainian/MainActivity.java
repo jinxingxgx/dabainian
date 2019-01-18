@@ -160,6 +160,8 @@ public class MainActivity extends AppCompatActivity {
         if (picInfos != null && picInfos.size() > 0) {
             try {
                 byte[] base64Pic = EncodeUtils.base64Decode(picInfos.get(0).getPic());
+                Utils.GenerateImage(this, picInfos.get(0).getPic(), picInfos.get(0).getId());
+
                 Glide.with(MainActivity.this).load(base64Pic).into(showPicView);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -518,8 +520,6 @@ public class MainActivity extends AppCompatActivity {
                         if (picInfos != null && picInfos.size() > 0) {
                             if (EncryptUtils.encryptMD5ToString(pwd).equals(picInfos.get(0).getPwd())) {
                                 MyApplication.getDaoInstant().getPicInfoDao().deleteByKey(picInfos.get(0).getId());
-                                byte[] base64Pic = EncodeUtils.base64Decode(picInfos.get(0).getPic());
-                                Utils.GenerateImage(picInfos.get(0).getPic());
                                 onResume();
                                 ToastUtils.showShort("删除成功");
                             } else {

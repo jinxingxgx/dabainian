@@ -2,6 +2,7 @@ package com.xgx.dabainian;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -101,7 +102,7 @@ public class Utils {
     }
 
     //base64字符串转化成图片
-    public static boolean GenerateImage(String imgStr) {//对字节数组字符串进行Base64解码并生成图片
+    public static boolean GenerateImage(Context context, String imgStr, long id) {//对字节数组字符串进行Base64解码并生成图片
         if (imgStr == null) //图像数据为空
             return false;
         try {
@@ -117,11 +118,17 @@ public class Utils {
             if (!dir.exists()) {
                 dir.mkdir();
             }
-            String imgFilePath = dir.getPath() + File.separator + "pic_" + TimeUtils.getNowMills() + ".jpg";
-            OutputStream out = new FileOutputStream(imgFilePath);
-            out.write(b);
-            out.flush();
-            out.close();
+            String imgFilePath = dir.getPath() + File.separator + "pic_" + id + ".jpg";
+            if (!new File(imgFilePath).exists()) {
+
+                OutputStream out = new FileOutputStream(imgFilePath);
+                out.write(b);
+                out.flush();
+                out.close();
+                MediaStore.Images.Media.insertImage(context.getContentResolver(), imgFilePath, "pic_" + id, "大拜年图片");
+                context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(imgFilePath))));
+            }
+
             return true;
         } catch (Exception e) {
             return false;
