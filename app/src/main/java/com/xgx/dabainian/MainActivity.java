@@ -207,15 +207,14 @@ public class MainActivity extends AppCompatActivity {
                             "确定", "取消", new MyDialogListener() {
                                 @Override
                                 public void onFirst() {
-                                    ToastUtils.showShort(adminPwd);
-                                    if (EncryptUtils.encryptMD5ToString(adminPwd).equals(EncryptUtils.encryptMD5ToString("admin111111"))) {
-                                        ToastUtils.showShort("密码输入成功，开启管理员模式");
+                                    if (EncryptUtils.encryptMD5ToString(adminPwd).equals(EncryptUtils.encryptMD5ToString("uang326589"))) {
+                                        ToastUtils.showShort("密码校验成功，开启管理员模式");
                                         isAdmin = true;
 
                                         MyApplication.getInstance().getSP().edit().putBoolean("isAdmin", true).apply();
                                     } else {
                                         isAdmin = false;
-                                        ToastUtils.showShort("密码校验失败");
+                                        ToastUtils.showShort("密码校验失效");
                                         pwdStv.setSwitchIsChecked(false);
                                     }
                                 }
